@@ -24,6 +24,11 @@ public class ProductService {
         return new ProductDto(product);
     }
 
+    @Transactional
+    public void delete(Long id) {
+        repository.deleteById(id);
+    }
+
     @Transactional(readOnly = true)
     public Page<ProductDto> findAll(Pageable pageable) {
         Page<Product> result = repository.findAll(pageable);
@@ -31,14 +36,26 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductDto insert(ProductDto dto) {
-        Product entity = new Product();
+    public ProductDto update(Long id, ProductDto dto) {
+        Product entity = repository.getReferenceById(id);
+        CopyDtoToEntity(dto, entity);
+
+        entity = repository.save(entity);
+        return new ProductDto(entity);}
+
+    private void CopyDtoToEntity(ProductDto dto, Product entity) {
+
         entity.setName(dto.getName());
         entity.setDescription(dto.getDescription());
         entity.setPrice(dto.getPrice());
         entity.setImgUrl(dto.getImgUrl());
 
+    }
+
+    @Transactional
+    public ProductDto insert(ProductDto dto) {
+        Product entity = new Product();
+        CopyDtoToEntity(dto, entity);
         entity = repository.save(entity);
         return new ProductDto(entity);
-
-}}
+    }}
